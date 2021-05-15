@@ -4,6 +4,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -35,6 +37,13 @@ export class User {
   @Column({ type: 'integer', default: 0 })
   @Exclude()
   tokenVersion: number;
+
+  @ManyToMany(() => User, (user) => user.following)
+  @JoinTable()
+  followers: User[];
+
+  @ManyToMany(() => User, (user) => user.followers)
+  following: User[];
 
   verifyPassword(plain: string): Promise<boolean> {
     return argon2.verify(this.password, plain);
