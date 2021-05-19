@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { CookieOptions } from 'express';
@@ -15,13 +15,21 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<User | null> {
-    const user = await this.usersService.findOneByUsername(username);
-    if (user && user.verifyPassword(password)) {
-      return user;
+  async validateUser(email: string, password: string): Promise<User | null> {
+    const user = await this.usersService.findOneByEmail(email);
+    if (!user) {
+      throw new BadRequestException(
+        "The email you entered doesn't belong to an account. Please check your email and try again.",
+      );
     }
 
-    return null;
+    if (!(await user.verifyPassword(password))) {
+      throw new BadRequestException(
+        'Sorry, your password was incorrect. Please double-check your password.',
+      );
+    }
+
+    return user;
   }
 
   makeAccessToken(user: User): string {

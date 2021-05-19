@@ -6,13 +6,14 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Post } from '../posts/posts.entity';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  @Exclude()
   id: string;
 
   @Column({ unique: true })
@@ -38,14 +39,19 @@ export class User {
   @Exclude()
   tokenVersion: number;
 
-  @ManyToMany(() => User, (user) => user.following)
+  @ManyToMany(() => User, (user) => user.following, { cascade: true })
   @JoinTable()
   followers: User[];
 
   @ManyToMany(() => User, (user) => user.followers)
   following: User[];
 
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[];
+
   verifyPassword(plain: string): Promise<boolean> {
-    return argon2.verify(this.password, plain);
+    return argon2.verify(this.password, plain, {
+      saltLength: 12,
+    });
   }
 }

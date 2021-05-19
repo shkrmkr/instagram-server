@@ -78,4 +78,10 @@ export class AuthController {
       user: req.user,
     });
   }
+
+  @Get('logout')
+  @UseGuards(JwtAccessTokenAuthGuard)
+  logout(@Req() req: RequestWithUser) {
+    req.res.clearCookie('cid', { path: '/' });
+  }
 }

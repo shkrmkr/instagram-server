@@ -1,7 +1,11 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import argon2 from 'argon2';
-import { In, Not, Repository } from 'typeorm';
+import { Connection, In, Not, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './users.entity';
 
@@ -10,6 +14,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepo: Repository<User>,
+    private connection: Connection,
   ) {}
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
@@ -38,24 +43,48 @@ export class UsersService {
     return this.usersRepo.findOne(id);
   }
 
-  findOneByUsername(username: User['username']): Promise<User | undefined> {
-    return this.usersRepo.findOne({ where: { username } });
+  findOneByEmail(email: User['email']): Promise<User | undefined> {
+    return this.usersRepo.findOne({ where: { email } });
   }
 
   async getFollowSuggestions(user: User): Promise<User[]> {
     const dbUser = await this.usersRepo.findOne(user.id, {
-      relations: ['followers'],
+      relations: ['following'],
     });
 
     const suggestions = await this.usersRepo.find({
       where: {
-        id: Not(In(dbUser.followers)),
+        id: Not(In(dbUser.following.map((account) => account.id))),
       },
       take: 5,
     });
 
     // suggestions 목록에 user 자신이 있으면 제외
     return suggestions.filter((suggestion) => suggestion.id !== user.id);
+  }
+
+  async toggleFollow(user: User, followeeId: User['id']) {
+    const userToBeFollowed = await this.usersRepo.findOne(followeeId, {
+      relations: ['followers'],
+    });
+
+    if (!userToBeFollowed) {
+      throw new NotFoundException(`User with id ${followeeId} not found.`);
+    }
+
+    const alreadyFollowing = userToBeFollowed.followers.some(
+      (follower) => follower.id === user.id,
+    );
+
+    if (alreadyFollowing) {
+      userToBeFollowed.followers = userToBeFollowed.followers.filter(
+        (follower) => follower.id !== user.id,
+      );
+    } else {
+      userToBeFollowed.followers = [...userToBeFollowed.followers, user];
+    }
+
+    await this.connection.manager.save(userToBeFollowed);
   }
 
   /*

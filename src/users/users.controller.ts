@@ -2,6 +2,8 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Param,
+  Post,
   Req,
   UseGuards,
   UseInterceptors,
@@ -16,8 +18,16 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
-  @Get('/suggestions')
+  @Get('suggestions')
   getFollowSuggestions(@Req() req: RequestWithUser) {
     return this.usersService.getFollowSuggestions(req.user);
+  }
+
+  @Post('follow/:followeeId')
+  toggleFollow(
+    @Req() req: RequestWithUser,
+    @Param('followeeId') followeeId: string,
+  ) {
+    return this.usersService.toggleFollow(req.user, followeeId);
   }
 }
