@@ -41,21 +41,41 @@ export class PostsService {
       order: {
         createdAt: 'DESC',
       },
-      relations: ['user', 'likedBy'],
+      relations: ['user', 'likedBy', 'comments', 'comments.user'],
     });
 
     postsToFeed.forEach((post) => {
       if (post.likedBy.some((likedUser) => likedUser.id === user.id)) {
         post.isLikedByUser = true;
       }
+
+      post.totalLikes = post.likedBy.length;
     });
 
     return postsToFeed;
   }
 
+  async getPostById(user: User, postId: Post['id']): Promise<Post> {
+    const dbPost = await this.postsRepo.findOne(postId, {
+      relations: ['likedBy', 'user', 'comments', 'comments.user'],
+    });
+
+    if (!dbPost) {
+      throw new NotFoundException(`Post with the id of ${postId} not found.`);
+    }
+
+    dbPost.isLikedByUser = dbPost.likedBy.some(
+      (likedUser) => likedUser.id === user.id,
+    );
+
+    dbPost.totalLikes = dbPost.likedBy.length;
+
+    return dbPost;
+  }
+
   async toggleLike(user: User, postId: Post['id']): Promise<Post> {
     const dbPost = await this.postsRepo.findOne(postId, {
-      relations: ['likedBy'],
+      relations: ['likedBy', 'user', 'comments', 'comments.user'],
     });
 
     if (!dbPost) {
@@ -75,6 +95,8 @@ export class PostsService {
       dbPost.likedBy = [...dbPost.likedBy, user];
       dbPost.isLikedByUser = true;
     }
+
+    dbPost.totalLikes = dbPost.likedBy.length;
 
     await this.connection.manager.save(dbPost);
 

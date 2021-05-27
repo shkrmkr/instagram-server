@@ -34,6 +34,14 @@ export class PostsController {
     return this.postsService.feedPosts(req.user);
   }
 
+  @Get(':postId')
+  getPostById(
+    @Req() req: RequestWithUser,
+    @Param('postId') postId: PostEntity['id'],
+  ) {
+    return this.postsService.getPostById(req.user, postId);
+  }
+
   @Post('likes/:postId')
   toggleLike(
     @Req() req: RequestWithUser,

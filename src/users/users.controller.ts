@@ -23,11 +23,11 @@ export class UsersController {
     return this.usersService.getFollowSuggestions(req.user);
   }
 
-  @Post('follow/:followeeId')
+  @Post('follow/:username')
   toggleFollow(
     @Req() req: RequestWithUser,
-    @Param('followeeId') followeeId: string,
+    @Param('username') username: string,
   ) {
-    return this.usersService.toggleFollow(req.user, followeeId);
+    return this.usersService.toggleFollow(req.user, username);
   }
 }

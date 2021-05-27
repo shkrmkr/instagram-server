@@ -14,6 +14,7 @@ import { Post } from '../posts/posts.entity';
 @Entity('users')
 export class User {
   @PrimaryGeneratedColumn('uuid')
+  @Exclude()
   id: string;
 
   @Column({ unique: true })

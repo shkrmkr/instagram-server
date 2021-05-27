@@ -63,13 +63,16 @@ export class UsersService {
     return suggestions.filter((suggestion) => suggestion.id !== user.id);
   }
 
-  async toggleFollow(user: User, followeeId: User['id']) {
-    const userToBeFollowed = await this.usersRepo.findOne(followeeId, {
-      relations: ['followers'],
-    });
+  async toggleFollow(user: User, username: User['username']) {
+    const userToBeFollowed = await this.usersRepo.findOne(
+      { username },
+      {
+        relations: ['followers'],
+      },
+    );
 
     if (!userToBeFollowed) {
-      throw new NotFoundException(`User with id ${followeeId} not found.`);
+      throw new NotFoundException(`User ${username} not found.`);
     }
 
     const alreadyFollowing = userToBeFollowed.followers.some(
