@@ -13,21 +13,30 @@ import { RequestWithUser } from 'src/auth/interface/request-with-user.interface'
 import { UsersService } from './users.service';
 
 @Controller('users')
-@UseGuards(JwtAccessTokenAuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
   @Get('suggestions')
+  @UseGuards(JwtAccessTokenAuthGuard)
   getFollowSuggestions(@Req() req: RequestWithUser) {
     return this.usersService.getFollowSuggestions(req.user);
   }
 
   @Post('follow/:username')
+  @UseGuards(JwtAccessTokenAuthGuard)
   toggleFollow(
     @Req() req: RequestWithUser,
     @Param('username') username: string,
   ) {
     return this.usersService.toggleFollow(req.user, username);
+  }
+
+  @Get(':username')
+  getUserProfile(
+    @Req() req: RequestWithUser,
+    @Param('username') username: string,
+  ) {
+    return this.usersService.getUserProfile(req.user, username);
   }
 }

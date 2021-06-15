@@ -87,7 +87,32 @@ export class UsersService {
       userToBeFollowed.followers = [...userToBeFollowed.followers, user];
     }
 
-    await this.connection.manager.save(userToBeFollowed);
+    await this.usersRepo.save(userToBeFollowed);
+  }
+
+  async getUserProfile(currentUser: User, username: User['username']) {
+    const dbUser = await this.usersRepo.findOne({
+      where: { username },
+      relations: ['posts', 'followers', 'following'],
+    });
+
+    if (!dbUser) {
+      throw new NotFoundException(
+        `User with username of ${username} is not found.`,
+      );
+    }
+
+    dbUser.postCount = dbUser.posts.length;
+    dbUser.followersCount = dbUser.followers.length;
+    dbUser.followingCount = dbUser.following.length;
+    dbUser.isFollowed = currentUser
+      ? dbUser.followers.some((user) => user.id === currentUser.id)
+      : false;
+
+    dbUser.followers = undefined;
+    dbUser.following = undefined;
+
+    return dbUser;
   }
 
   /*

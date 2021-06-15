@@ -55,4 +55,9 @@ export class User {
       saltLength: 12,
     });
   }
+
+  postCount: number;
+  followersCount: number;
+  followingCount: number;
+  isFollowed: boolean;
 }
