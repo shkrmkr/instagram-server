@@ -103,9 +103,9 @@ export class UsersService {
     }
 
     dbUser.postCount = dbUser.posts.length;
-    dbUser.followersCount = dbUser.followers.length;
+    dbUser.followerCount = dbUser.followers.length;
     dbUser.followingCount = dbUser.following.length;
-    dbUser.isFollowed = currentUser
+    dbUser.isFollowedByUser = currentUser
       ? dbUser.followers.some((user) => user.id === currentUser.id)
       : false;
 

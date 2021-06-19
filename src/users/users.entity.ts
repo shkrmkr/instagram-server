@@ -36,6 +36,12 @@ export class User {
   @Column({ nullable: true })
   profilePictureUrl?: string;
 
+  @Column({ nullable: true, length: 150 })
+  bio?: string;
+
+  @Column({ nullable: true })
+  website?: string;
+
   @Column({ type: 'integer', default: 0 })
   @Exclude()
   tokenVersion: number;
@@ -57,7 +63,7 @@ export class User {
   }
 
   postCount: number;
-  followersCount: number;
+  followerCount: number;
   followingCount: number;
-  isFollowed: boolean;
+  isFollowedByUser: boolean;
 }

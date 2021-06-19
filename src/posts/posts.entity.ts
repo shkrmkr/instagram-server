@@ -40,4 +40,5 @@ export class Post {
   isLikedByUser?: boolean = false;
 
   totalLikes?: number = 0;
+  totalComments?: number = 0;
 }
