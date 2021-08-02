@@ -9,6 +9,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { JwtAccessTokenAuthGuard } from 'src/auth/guard/jwt-access-token-auth.guard';
+import { OptionalJwtAccessTokenAuthGuard } from 'src/auth/guard/optional-jwt-access-token-auth.guard';
 import { RequestWithUser } from 'src/auth/interface/request-with-user.interface';
 import { UsersService } from './users.service';
 
@@ -33,6 +34,7 @@ export class UsersController {
   }
 
   @Get(':username')
+  @UseGuards(OptionalJwtAccessTokenAuthGuard)
   getUserProfile(
     @Req() req: RequestWithUser,
     @Param('username') username: string,

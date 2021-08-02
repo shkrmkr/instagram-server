@@ -93,7 +93,13 @@ export class UsersService {
   async getUserProfile(currentUser: User, username: User['username']) {
     const dbUser = await this.usersRepo.findOne({
       where: { username },
-      relations: ['posts', 'followers', 'following'],
+      relations: [
+        'posts',
+        'posts.likedBy',
+        'posts.comments',
+        'followers',
+        'following',
+      ],
     });
 
     if (!dbUser) {
@@ -111,6 +117,17 @@ export class UsersService {
 
     dbUser.followers = undefined;
     dbUser.following = undefined;
+
+    dbUser.posts = dbUser.posts.map((post) => ({
+      ...post,
+      isLikedByUser: post.likedBy.some(
+        (likedUser) => likedUser.id === currentUser?.id,
+      ),
+      totalLikes: post.likedBy.length,
+      totalComments: post.comments.length,
+      comments: undefined,
+      likedBy: undefined,
+    }));
 
     return dbUser;
   }
